@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class SubjectController extends Controller
 {
@@ -32,6 +34,19 @@ class SubjectController extends Controller
     public function destroy(Request $request, Subject $subject)
     {
         abort_unless($subject->user_id === $request->user()->id, 404);
+
+        foreach ($subject->documents as $doc) {
+            Storage::delete($doc->path);
+
+            try {
+                Http::withHeaders(['X-Internal-Secret' => config('services.rag.secret')])
+                    ->timeout(15)
+                    ->delete(config('services.rag.url') . '/documents/' . $doc->id);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
         $subject->delete();
 
         return response()->noContent();

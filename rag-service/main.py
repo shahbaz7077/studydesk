@@ -104,11 +104,11 @@ def health():
 
 
 @app.post("/ingest", dependencies=[Depends(verify_secret)])
-async def ingest(file: UploadFile = File(...), document_id: int = Form(...)):
+def ingest(file: UploadFile = File(...), document_id: int = Form(...)):
     if not (file.filename or "").lower().endswith(".pdf"):
         raise HTTPException(400, "Only PDF files are supported")
 
-    data = await file.read()
+    data = file.file.read()
     try:
         reader = PdfReader(io.BytesIO(data))
     except Exception:

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class ChatController extends Controller
@@ -44,6 +45,11 @@ class ChatController extends Controller
             ]);
 
         if ($response->failed()) {
+            Log::error('RAG chat failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
             return response()->json(['message' => 'AI service abhi available nahi hai.'], 502);
         }
 
