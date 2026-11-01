@@ -66,8 +66,8 @@ export function ChatSession({ chatId, subjectId: initialSubject }: ChatSessionPr
       const withReply = [...withUser, makeMessage("assistant", reply)];
       setMessages(withReply);
       persist(withReply);
-    } catch {
-      toast("Could not get a reply. Please try again.");
+    }     catch (e) {
+      toast(e instanceof Error ? e.message : "Could not get a reply. Please try again.");
     } finally {
       setSending(false);
     }

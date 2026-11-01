@@ -20,10 +20,18 @@ export function UploadDropzone() {
     if (!list || list.length === 0) return;
     const files = Array.from(list);
     const valid = files.filter((f) => isSupported(f.name));
-    if (valid.length < files.length) toast("Only PDF, TXT and MD files are supported.");
+        if (valid.length < files.length) toast("Only PDF files are supported.");
     if (valid.length === 0) return;
-    const count = await addDocuments(valid, selected);
-    toast(`${count} file${count > 1 ? "s" : ""} added.`);
+    if (!selected) {
+      toast("Pehle ek subject banao.");
+      return;
+    }
+    try {
+      const count = await addDocuments(valid, selected);
+      toast(`${count} file${count > 1 ? "s" : ""} uploaded. Processing shuru…`);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Upload failed.");
+    }
   }
 
   return (

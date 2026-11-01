@@ -11,12 +11,16 @@ export function AddSubjectModal({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  function submit(e: FormEvent) {
+     async function submit(e: FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-    addSubject(name.trim(), description.trim());
-    toast("Subject added.");
-    onClose();
+    try {
+      await addSubject(name.trim(), description.trim());
+      toast("Subject added.");
+      onClose();
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Could not add subject.");
+    }
   }
 
   return (

@@ -6,28 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('documents', function (Blueprint $table) {
+        Schema::create('subjects', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->string('tone')->default('indigo');
+            $table->string('icon')->default('book');
             $table->timestamps();
-
-$table->foreignId('user_id')->constrained()->cascadeOnDelete();
-$table->string('title');
-$table->string('path');                      // B2 mein file ka path
-$table->string('status')->default('pending'); // pending, processing, ready, failed
-
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('documents');
+        Schema::dropIfExists('subjects');
     }
 };

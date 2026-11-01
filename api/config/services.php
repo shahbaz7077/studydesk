@@ -14,6 +14,11 @@ return [
     |
     */
 
+    'rag' => [
+    'url' => env('RAG_URL'),
+    'secret' => env('INTERNAL_SECRET'),
+],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

@@ -13,6 +13,8 @@ export interface Subject {
 
 export type DocumentExt = "pdf" | "txt" | "md";
 
+export type DocStatus = "pending" | "processing" | "ready" | "failed";
+
 export interface StudyDocument {
   id: string;
   name: string;
@@ -20,6 +22,8 @@ export interface StudyDocument {
   ext: DocumentExt;
   subjectId: string;
   addedAt: string; // ISO date
+  status?: DocStatus;
+  error?: string | null;
 }
 
 export type ChatRole = "user" | "assistant";

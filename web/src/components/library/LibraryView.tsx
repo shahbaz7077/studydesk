@@ -28,12 +28,20 @@ export function LibraryView() {
   async function handleFiles(list: FileList | null) {
     if (!list) return;
     const files = Array.from(list).filter((f) => isSupported(f.name));
-    if (files.length < list.length) toast("Only PDF, TXT and MD files are supported.");
+        if (files.length < list.length) toast("Only PDF files are supported.");
     if (files.length === 0) return;
     // Files go to the active filter's subject, or the first subject.
     const subjectId = filter !== "all" ? filter : subjects[0]?.id ?? "";
-    const count = await addDocuments(files, subjectId);
-    toast(`${count} file${count > 1 ? "s" : ""} added.`);
+    if (!subjectId) {
+      toast("Pehle ek subject banao.");
+      return;
+    }
+    try {
+      const count = await addDocuments(files, subjectId);
+      toast(`${count} file${count > 1 ? "s" : ""} uploaded. Processing shuru…`);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Upload failed.");
+    }
   }
 
   return (
