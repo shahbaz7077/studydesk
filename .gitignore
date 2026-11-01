@@ -1,7 +1,22 @@
+# Node / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Secrets aur local files
 .env
 .env.*
 !.env.example
-chroma_db/
+
+# Python (FastAPI)
 .venv/
+__pycache__/
+chroma_db/
+
+# Laravel
+vendor/
 *.sqlite
-node_modules
+
+.DS_Store
