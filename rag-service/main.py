@@ -4,7 +4,8 @@ import os
 import chromadb
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
-from openai import OpenAI
+from google import genai
+from google.genai import types
 from pydantic import BaseModel
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
@@ -16,9 +17,8 @@ app = FastAPI()
 # --- Settings ---
 CHUNK_SIZE = 800
 OVERLAP = 100
-
-LLM_MODEL = os.getenv("LLM_MODEL")
-llm = OpenAI(api_key=os.getenv("LLM_API_KEY"), base_url=os.getenv("LLM_BASE_URL"))
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-flash-latest")
+llm = genai.Client(api_key=os.getenv("LLM_API_KEY"))
 
 SYSTEM_PROMPT = (
     "You are a study assistant. Answer ONLY using the provided context. "
@@ -155,19 +155,16 @@ def chat(body: ChatBody):
 
     context = "\n\n".join(f"[Page {s['page']}]\n{s['text']}" for s in sources)
     try:
-        resp = llm.chat.completions.create(
+        resp = llm.models.generate_content(
             model=LLM_MODEL,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {
-                    "role": "user",
-                    "content": f"Context:\n{context}\n\nQuestion: {body.question}",
-                },
-            ],
-            temperature=0.2,
+            contents=f"Context:\n{context}\n\nQuestion: {body.question}",
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                temperature=0.2,
+            ),
         )
     except Exception as e:
-        # key/model/URL galat ho to yahan asli wajah dikhegi
+        # key/model galat ho to yahan asli wajah dikhegi
         raise HTTPException(502, f"LLM call failed: {e}")
 
-    return {"answer": resp.choices[0].message.content, "sources": sources}
+    return {"answer": resp.text or "Jawab nahi mil saka.", "sources": sources}
