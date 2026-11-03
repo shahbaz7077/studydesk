@@ -1,5 +1,6 @@
 import io
 import os
+import time
 
 import chromadb
 from dotenv import load_dotenv
@@ -154,17 +155,22 @@ def chat(body: ChatBody):
         return {"answer": "No material found for this subject.", "sources": []}
 
     context = "\n\n".join(f"[Page {s['page']}]\n{s['text']}" for s in sources)
-    try:
-        resp = llm.models.generate_content(
-            model=LLM_MODEL,
-            contents=f"Context:\n{context}\n\nQuestion: {body.question}",
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=0.2,
-            ),
-        )
-    except Exception as e:
-        # key/model galat ho to yahan asli wajah dikhegi
-        raise HTTPException(502, f"LLM call failed: {e}")
+    last_err = None
+    resp = None
+    for attempt in range(3):
+        try:
+            resp = llm.models.generate_content(
+                model=LLM_MODEL,
+                contents=f"Context:\n{context}\n\nQuestion: {body.question}",
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT, temperature=0.2
+                ),
+            )
+            break
+        except Exception as e:
+            last_err = e
+            time.sleep(2 * (attempt + 1))  # 2s, 4s, 6s
+    if resp is None:
+        raise HTTPException(502, f"LLM call failed: {last_err}") 
 
     return {"answer": resp.text or "Jawab nahi mil saka.", "sources": sources}
